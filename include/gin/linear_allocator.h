@@ -34,6 +34,19 @@
 
 namespace gin
 {
+    ////////////////////////////////////////
+    // A simple linear allocator.
+    // A pre-allocated buffer is provided and the allocator
+    // will carve out allocations out of it.
+    //
+    // There is no per allocation overhead.
+    // The buffer memory is not modified by the allocator.
+    // The allocator is not thread-safe.
+    //
+    // See here for more details:
+    // http://nfrechette.github.io/2014/05/21/linear_allocator/
+    ////////////////////////////////////////
+
     template<typename SizeType>
     class TLinearAllocator : public Allocator
     {

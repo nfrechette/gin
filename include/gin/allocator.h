@@ -39,6 +39,9 @@ namespace gin
     // on the vtable when using the most common functionality:
     // allocation and deallocation (both of which can be achieved
     // with this function).
+    //
+    // See here for more details:
+    // http://nfrechette.github.io/2014/05/11/memory_allocator_interface/
     //////////////////////////////////////// 
 
     class Allocator
@@ -51,12 +54,16 @@ namespace gin
     public:
         virtual         ~Allocator() {}
 
+        // Not all allocators support per pointer freeing, maybe
+        // these should be renamed?
         virtual void*   Allocate(size_t size, size_t alignment) = 0;
         virtual void    Deallocate(void* ptr, size_t size) = 0;
 
         inline void*    Reallocate(void* oldPtr, size_t oldSize, size_t newSize, size_t alignment);
 
         virtual bool    IsOwnerOf(void* ptr) const = 0;
+
+        // TODO: Release() and IsInitialized() are good candidates to add here
 
     protected:
         ReallocateFun   m_reallocateFun;
