@@ -23,6 +23,8 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         REQUIRE(!alloc.IsOwnerOf(&buffer[0] + 32768));
 
         uint8_t* ptr0 = static_cast<uint8_t*>(alloc.Allocate(2, 1));
+        if (ptr0) memset(ptr0, 0xcd, 2);
+
         REQUIRE(alloc.IsOwnerOf(ptr0));
         REQUIRE(alloc.IsOwnerOf(ptr0 + 1));
         REQUIRE(!alloc.IsOwnerOf(ptr0 + 2));
@@ -31,18 +33,21 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
     SECTION("test allocation")
     {
         void* ptr0 = alloc.Allocate(2, 1);
+        if (ptr0) memset(ptr0, 0xcd, 2);
 
         REQUIRE(ptr0 == &buffer[0]);
         REQUIRE(alloc.IsOwnerOf(ptr0));
         REQUIRE(alloc.GetAllocatedSize() == 2);
 
         void* ptr1 = alloc.Allocate(1022, 1);
+        if (ptr1) memset(ptr1, 0xcd, 1022);
 
         REQUIRE(alloc.IsOwnerOf(ptr1));
         REQUIRE(alloc.GetAllocatedSize() == 1024);
         REQUIRE(ptr0 != ptr1);
 
         void* ptr2 = alloc.Allocate(1, 1);
+        if (ptr2) memset(ptr2, 0xcd, 1);
 
         REQUIRE(ptr2 == nullptr);
         REQUIRE(alloc.GetAllocatedSize() == 1024);
@@ -54,6 +59,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         size_t allocatedSize = 0;
 
         void* ptr0 = alloc.Allocate(2, 8);
+        if (ptr0) memset(ptr0, 0xcd, 2);
         size_t ptr0Size = AlignTo(bufferHead + allocatedSize, 8) - (bufferHead + allocatedSize) + 2;
 
         allocatedSize += ptr0Size;
@@ -63,6 +69,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         REQUIRE(IsAlignedTo(ptr0, 8));
 
         void* ptr1 = alloc.Allocate(2, 16);
+        if (ptr1) memset(ptr1, 0xcd, 2);
         size_t ptr1Size = AlignTo(bufferHead + allocatedSize, 16) - (bufferHead + allocatedSize) + 2;
 
         allocatedSize += ptr1Size;
@@ -76,6 +83,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
     SECTION("test nop free")
     {
         void* ptr0 = alloc.Allocate(2, 1);
+        if (ptr0) memset(ptr0, 0xcd, 2);
 
         REQUIRE(alloc.GetAllocatedSize() == 2);
 
@@ -84,6 +92,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         REQUIRE(alloc.GetAllocatedSize() == 2);
 
         void* ptr1 = alloc.Allocate(2, 1);
+        if (ptr1) memset(ptr1, 0xcd, 2);
 
         REQUIRE(ptr0 != ptr1);
         REQUIRE(alloc.GetAllocatedSize() == 4);
@@ -92,6 +101,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
     SECTION("test reset")
     {
         void* ptr0 = alloc.Allocate(2, 1);
+        if (ptr0) memset(ptr0, 0xcd, 2);
 
         REQUIRE(alloc.GetAllocatedSize() == 2);
 
@@ -100,6 +110,7 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         REQUIRE(alloc.GetAllocatedSize() == 0);
 
         void* ptr1 = alloc.Allocate(2, 1);
+        if (ptr1) memset(ptr1, 0xcd, 2);
 
         REQUIRE(alloc.GetAllocatedSize() == 2);
         REQUIRE(ptr0 == ptr1);
@@ -138,6 +149,7 @@ TEST_CASE("test invalid arguments", "[LinearAllocator]")
         REQUIRE(alloc.GetAllocatedSize() == 0);
 
         void* ptr0 = alloc.Allocate(BUFFER_SIZE + 1, 1);
+        if (ptr0) memset(ptr0, 0xcd, BUFFER_SIZE + 1);
 
         REQUIRE(ptr0 == nullptr);
     }
@@ -152,6 +164,7 @@ TEST_CASE("test invalid arguments", "[LinearAllocator]")
         REQUIRE(alloc.GetAllocatedSize() == 0);
 
         void* ptr0 = alloc.Allocate(1, 16);
+        if (ptr0) memset(ptr0, 0xcd, 1);
 
         REQUIRE(ptr0 == nullptr);
     }
@@ -166,6 +179,7 @@ TEST_CASE("test invalid arguments", "[LinearAllocator]")
         REQUIRE(alloc.GetAllocatedSize() == 0);
 
         void* ptr0 = alloc.Allocate(32, 1);
+        if (ptr0) memset(ptr0, 0xcd, 32);
 
         REQUIRE(ptr0 == nullptr);
     }
