@@ -156,6 +156,14 @@ namespace gin
     template<typename SizeType>
     void TLinearAllocator<SizeType>::Release()
     {
+        //assert(IsInitialized());
+
+        if (!IsInitialized())
+        {
+            // Invalid allocator state
+            return;
+        }
+
         // Only 'buffer' is used to tell if we are initialized.
         // Everything else is set when we initialized.
         // If we are not initialized, the allocator cannot be safely used.

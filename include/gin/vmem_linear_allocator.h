@@ -182,6 +182,8 @@ namespace gin
     template<typename SizeType>
     void TVMemLinearAllocator<SizeType>::Release()
     {
+        //assert(IsInitialized());
+
         if (!IsInitialized())
         {
             // Invalid allocator state
