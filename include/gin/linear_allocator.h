@@ -44,7 +44,7 @@ namespace gin
     // The allocator is not thread-safe.
     //
     // See here for more details:
-    // http://nfrechette.github.io/2014/05/21/linear_allocator/
+    // http://nfrechette.github.io/2015/05/21/linear_allocator/
     ////////////////////////////////////////
 
     template<typename SizeType>
@@ -83,8 +83,8 @@ namespace gin
 
     ////////////////////////////////////////
 
-    // Only 'buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialized.
+    // Only 'm_buffer' is used to tell if we are initialized.
+    // Everything else is set when we initialize.
     // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TLinearAllocator<SizeType>::TLinearAllocator()
@@ -93,8 +93,8 @@ namespace gin
     {
     }
 
-    // Only 'buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialized.
+    // Only 'm_buffer' is used to tell if we are initialized.
+    // Everything else is set when we initialize.
     // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TLinearAllocator<SizeType>::TLinearAllocator(void* buffer, size_t bufferSize)
