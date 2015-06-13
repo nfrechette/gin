@@ -32,14 +32,27 @@
 #include <cstddef>
 #include <sys/mman.h>
 
-#define GIN_DEFAULT_VMEM_PROT (PROT_READ | PROT_WRITE)
-#define GIN_DEFAULT_VMEM_FLAGS (MAP_PRIVATE | MAP_ANON)
+#define GIN_DEFAULT_VMEM_PROT   (PROT_READ | PROT_WRITE)
+#define GIN_DEFAULT_VMEM_FLAGS  (MAP_PRIVATE | MAP_ANON)
+
+// See comments below about commit/decommit.
+// Enabling this will incur a performance hit but will prevent accidental
+// paging of decommitted memory regions.
+
+#define GIN_VMEM_SAFE           1
 
 namespace gin
 {
     inline void* VirtualReserve(size_t size)
     {
-        void* ptr = mmap(nullptr, size, PROT_NONE, GIN_DEFAULT_VMEM_FLAGS, -1, 0);
+#if GIN_VMEM_SAFE
+        int prot = PROT_NONE;
+#else
+        // TODO: This needs to be an argument to the function
+        int prot = GIN_DEFAULT_VMEM_PROT;
+#endif
+
+        void* ptr = mmap(nullptr, size, prot, GIN_DEFAULT_VMEM_FLAGS, -1, 0);
         return ptr;
     }
 
@@ -49,16 +62,35 @@ namespace gin
         return result == 0;
     }
 
+    // This is complicated on OS X...
+    // See: https://bugzilla.mozilla.org/show_bug.cgi?id=670596
+    // Here we use the fact that OS X has on demand paging.
+    // When safety is enabled, memory regions decommitted are always
+    // marker with PROT_NONE to prevent access and accidental paging.
+    // Decommitting is achieve with madvise but the memory usage reported
+    // might not be accurate since the decommitted pages are only taken
+    // away if there is memory pressure in the system.
+
     inline bool VirtualCommit(void* ptr, size_t size)
     {
-        void* result = mmap(ptr, size, GIN_DEFAULT_VMEM_PROT, MAP_FIXED | GIN_DEFAULT_VMEM_FLAGS, -1, 0);
-        return result == ptr;
+#if GIN_VMEM_SAFE
+        int result = mprotect(ptr, size, GIN_DEFAULT_VMEM_PROT);
+        return result == 0;
+#else
+        return true;
+#endif
     }
 
     inline bool VirtualDecommit(void* ptr, size_t size)
     {
-        void* result = mmap(ptr, size, PROT_NONE, MAP_FIXED | GIN_DEFAULT_VMEM_FLAGS, -1, 0);
-        return result == ptr;
+        int result = madvise(ptr, size, MADV_FREE);
+
+#if GIN_VMEM_SAFE
+        if (result != 0) return false;
+        result = mprotect(ptr, size, PROT_NONE);
+#endif
+
+        return result == 0;
     }
 
     inline void* VirtualAlloc(size_t size)
