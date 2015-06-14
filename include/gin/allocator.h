@@ -41,7 +41,7 @@ namespace gin
     // with this function).
     //
     // See here for more details:
-    // http://nfrechette.github.io/2014/05/11/memory_allocator_interface/
+    // http://nfrechette.github.io/2015/05/11/memory_allocator_interface/
     //////////////////////////////////////// 
 
     class Allocator

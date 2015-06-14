@@ -46,7 +46,7 @@ namespace gin
     // The allocator is not thread-safe.
     //
     // See here for more details:
-    // http://nfrechette.github.io/2014/05/21/linear_allocator/
+    // http://nfrechette.github.io/2015/06/11/vmem_linear_allocator/
     ////////////////////////////////////////
 
     template<typename SizeType>
