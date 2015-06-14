@@ -26,6 +26,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "../../platforms.h"
+#include "../../enum_flags_utils.h"
 
 #if GIN_OSX
 
@@ -43,16 +44,47 @@
 
 namespace gin
 {
-    inline void* VirtualReserve(size_t size)
+    enum class MemoryAccessFlags
     {
+        eCPU_None       = PROT_NONE,
+        eCPU_Read       = PROT_READ,
+        eCPU_Write      = PROT_WRITE,
+        eCPU_Exec       = PROT_EXEC,
+
+        eCPU_ReadWrite  = PROT_READ | PROT_WRITE,
+        eCPU_All        = PROT_READ | PROT_WRITE | PROT_EXEC,
+    };
+
+    IMPL_ENUM_FLAGS_OPERATORS(MemoryAccessFlags);
+
+    enum class MemoryRegionFlags
+    {
+        ePrivate        = MAP_PRIVATE,
+        eShared         = MAP_SHARED,
+        eAnonymous      = MAP_ANON,
+    };
+
+    IMPL_ENUM_FLAGS_OPERATORS(MemoryRegionFlags);
+
+    inline void* VirtualReserve(size_t size, size_t alignment,
+                                MemoryAccessFlags accessFlags,
+                                MemoryRegionFlags regionFlags)
+    {
+        if (alignment != 1)
+        {
+            // Alignment is not supported
+            return nullptr;
+        }
+
 #if GIN_VMEM_SAFE
         int prot = PROT_NONE;
 #else
-        // TODO: This needs to be an argument to the function
-        int prot = GIN_DEFAULT_VMEM_PROT;
+        int prot = static_cast<int>(accessFlags);
 #endif
 
-        void* ptr = mmap(nullptr, size, prot, GIN_DEFAULT_VMEM_FLAGS, -1, 0);
+        int flags = static_cast<int>(regionFlags);
+
+        void* ptr = mmap(nullptr, size, prot, flags, -1, 0);
         return ptr;
     }
 
@@ -71,10 +103,13 @@ namespace gin
     // might not be accurate since the decommitted pages are only taken
     // away if there is memory pressure in the system.
 
-    inline bool VirtualCommit(void* ptr, size_t size)
+    inline bool VirtualCommit(void* ptr, size_t size,
+                              MemoryAccessFlags accessFlags,
+                              MemoryRegionFlags regionFlags)
     {
 #if GIN_VMEM_SAFE
-        int result = mprotect(ptr, size, GIN_DEFAULT_VMEM_PROT);
+        int prot = static_cast<int>(accessFlags);
+        int result = mprotect(ptr, size, prot);
         return result == 0;
 #else
         return true;
@@ -93,9 +128,20 @@ namespace gin
         return result == 0;
     }
 
-    inline void* VirtualAlloc(size_t size)
+    inline void* VirtualAlloc(size_t size, size_t alignment,
+                              MemoryAccessFlags accessFlags,
+                              MemoryRegionFlags regionFlags)
     {
-        void* result = mmap(nullptr, size, GIN_DEFAULT_VMEM_PROT, GIN_DEFAULT_VMEM_FLAGS, -1, 0);
+        if (alignment != 1)
+        {
+            // Alignment is not supported
+            return nullptr;
+        }
+
+        int prot = static_cast<int>(accessFlags);
+        int flags = static_cast<int>(regionFlags);
+
+        void* result = mmap(nullptr, size, prot, flags, -1, 0);
         return result;
     }
 

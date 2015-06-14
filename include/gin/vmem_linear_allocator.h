@@ -134,7 +134,10 @@ namespace gin
             return;
         }
 
-        void* ptr = VirtualReserve(bufferSize);
+        MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
+        MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
+
+        void* ptr = VirtualReserve(bufferSize, 1, accessFlags, regionFlags);
         assert(ptr);
         if (!ptr)
         {
@@ -312,7 +315,11 @@ namespace gin
             void* commitPtr = reinterpret_cast<void*>(m_buffer + committedSize);
             SizeType commitSize = AlignTo(newAllocatedSize - committedSize, 4096);   // TODO: PAGE_SIZE
 
-            bool success = VirtualCommit(commitPtr, commitSize);
+            MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
+            MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
+
+            bool success = VirtualCommit(commitPtr, commitSize,
+                                         accessFlags, regionFlags);
             assert(success);
             if (!success)
             {
@@ -382,7 +389,11 @@ namespace gin
                 void* commitPtr = reinterpret_cast<void*>(allocatorImpl->m_buffer + committedSize);
                 SizeType commitSize = AlignTo(newAllocatedSize - committedSize, 4096);   // TODO: PAGE_SIZE
 
-                bool success = VirtualCommit(commitPtr, commitSize);
+                MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
+                MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
+
+                bool success = VirtualCommit(commitPtr, commitSize,
+                                             accessFlags, regionFlags);
                 assert(success);
                 if (!success)
                 {
