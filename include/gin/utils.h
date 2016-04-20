@@ -65,6 +65,22 @@ namespace gin
     {
         return value != 0 && (value & (value - 1)) == 0;
     }
+
+    // Cannot use void* here, it fails to compile as a constexpr
+    template<typename PtrType>
+    constexpr bool IsPointerInBuffer(PtrType* ptr, uintptr_t buffer, size_t bufferSize)
+    {
+#if 0
+        // Readable variant, cannot make this constexpr due to
+        // variable declaration being a C++1y extension
+        uintptr_t ptrValue = reinterpret_cast<uintptr_t>(ptr);
+        uintptr_t bufferEnd = buffer + bufferSize;
+
+        return ptrValue >= buffer && ptrValue < bufferEnd;
+#else
+        return reinterpret_cast<uintptr_t>(ptr) >= buffer && reinterpret_cast<uintptr_t>(ptr) < (buffer + bufferSize);
+#endif
+    }
 }
 
 #endif  // GIN_UTILS_H

@@ -205,12 +205,7 @@ namespace gin
             return false;
         }
 
-        uintptr_t ptrValue = reinterpret_cast<uintptr_t>(ptr);
-        uintptr_t bufferStart = m_buffer;
-        SizeType allocatedSize = m_allocatedSize;
-        uintptr_t bufferEnd = bufferStart + allocatedSize;
-
-        return ptrValue >= bufferStart && ptrValue < bufferEnd;
+        return IsPointerInBuffer(ptr, m_buffer, m_allocatedSize);
     }
 
     template<typename SizeType>
