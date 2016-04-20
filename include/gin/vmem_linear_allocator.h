@@ -87,23 +87,25 @@ namespace gin
 
     ////////////////////////////////////////
 
-    // Only 'm_buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialize.
-    // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TVMemLinearAllocator<SizeType>::TVMemLinearAllocator()
         : Allocator(&TVMemLinearAllocator<SizeType>::ReallocateImpl)
         , m_buffer(0)
+        , m_bufferSize(0)
+        , m_allocatedSize(0)
+        , m_lastAllocationOffset(0)
+        , m_committedSize(0)
     {
     }
 
-    // Only 'm_buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialize.
-    // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TVMemLinearAllocator<SizeType>::TVMemLinearAllocator(size_t bufferSize)
         : Allocator(&TVMemLinearAllocator<SizeType>::ReallocateImpl)
         , m_buffer(0)
+        , m_bufferSize(0)
+        , m_allocatedSize(0)
+        , m_lastAllocationOffset(0)
+        , m_committedSize(0)
     {
         Initialize(bufferSize);
     }
@@ -204,10 +206,11 @@ namespace gin
             return;
         }
 
-        // Only 'm_buffer' is used to tell if we are initialized.
-        // Everything else is set when we initialize.
-        // If we are not initialized, the allocator cannot be safely used.
         m_buffer = 0;
+        m_bufferSize = 0;
+        m_allocatedSize = 0;
+        m_lastAllocationOffset = 0;
+        m_committedSize = 0;
     }
 
     template<typename SizeType>
@@ -339,6 +342,8 @@ namespace gin
     template<typename SizeType>
     void* TVMemLinearAllocator<SizeType>::ReallocateImpl(Allocator* allocator, void* oldPtr, size_t oldSize, size_t newSize, size_t alignment)
     {
+        //assert(allocator);
+
         TVMemLinearAllocator<SizeType>* allocatorImpl = static_cast<TVMemLinearAllocator<SizeType>*>(allocator);
 
         //assert(allocatorImpl->IsInitialized());

@@ -83,23 +83,23 @@ namespace gin
 
     ////////////////////////////////////////
 
-    // Only 'm_buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialize.
-    // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TLinearAllocator<SizeType>::TLinearAllocator()
         : Allocator(&TLinearAllocator<SizeType>::ReallocateImpl)
         , m_buffer(0)
+        , m_bufferSize(0)
+        , m_allocatedSize(0)
+        , m_lastAllocationOffset(0)
     {
     }
 
-    // Only 'm_buffer' is used to tell if we are initialized.
-    // Everything else is set when we initialize.
-    // If we are not initialized, the allocator cannot be safely used.
     template<typename SizeType>
     TLinearAllocator<SizeType>::TLinearAllocator(void* buffer, size_t bufferSize)
         : Allocator(&TLinearAllocator<SizeType>::ReallocateImpl)
         , m_buffer(0)
+        , m_bufferSize(0)
+        , m_allocatedSize(0)
+        , m_lastAllocationOffset(0)
     {
         Initialize(buffer, bufferSize);
     }
@@ -124,7 +124,7 @@ namespace gin
             return;
         }
 
-        if (!buffer
+        if (buffer == nullptr
             || bufferSize == 0
             || bufferSize > static_cast<size_t>(std::numeric_limits<SizeType>::max()))
         {
@@ -164,10 +164,10 @@ namespace gin
             return;
         }
 
-        // Only 'buffer' is used to tell if we are initialized.
-        // Everything else is set when we initialized.
-        // If we are not initialized, the allocator cannot be safely used.
         m_buffer = 0;
+        m_bufferSize = 0;
+        m_allocatedSize = 0;
+        m_lastAllocationOffset = 0;
     }
 
     template<typename SizeType>
@@ -271,6 +271,8 @@ namespace gin
     template<typename SizeType>
     void* TLinearAllocator<SizeType>::ReallocateImpl(Allocator* allocator, void* oldPtr, size_t oldSize, size_t newSize, size_t alignment)
     {
+        //assert(allocator);
+
         TLinearAllocator<SizeType>* allocatorImpl = static_cast<TLinearAllocator<SizeType>*>(allocator);
 
         //assert(allocatorImpl->IsInitialized());
