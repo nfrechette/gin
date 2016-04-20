@@ -98,7 +98,7 @@ namespace gin
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=670596
     // Here we use the fact that OS X has on demand paging.
     // When safety is enabled, memory regions decommitted are always
-    // marker with PROT_NONE to prevent access and accidental paging.
+    // marked with PROT_NONE to prevent access and accidental paging.
     // Decommitting is achieve with madvise but the memory usage reported
     // might not be accurate since the decommitted pages are only taken
     // away if there is memory pressure in the system.
