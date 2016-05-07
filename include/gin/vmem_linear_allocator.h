@@ -139,7 +139,7 @@ namespace gin
         MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
         MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
 
-        void* ptr = VirtualReserve(bufferSize, 1, accessFlags, regionFlags);
+        void* ptr = VirtualReserve(bufferSize, accessFlags, regionFlags);
         assert(ptr);
         if (!ptr)
         {
@@ -276,8 +276,9 @@ namespace gin
             return nullptr;
         }
 
+        uintptr_t bufferStart = m_buffer;
         SizeType allocatedSize = m_allocatedSize;
-        uintptr_t bufferHead = m_buffer + allocatedSize;
+        uintptr_t bufferHead = bufferStart + allocatedSize;
         uintptr_t allocStart = AlignTo(bufferHead, alignment);
 
         //assert(allocStart >= bufferHead);
@@ -310,7 +311,7 @@ namespace gin
         if (newAllocatedSize > committedSize)
         {
             // We need to commit more memory
-            void* commitPtr = reinterpret_cast<void*>(m_buffer + committedSize);
+            void* commitPtr = reinterpret_cast<void*>(bufferStart + committedSize);
             SizeType commitSize = AlignTo(newAllocatedSize - committedSize, 4096);   // TODO: PAGE_SIZE
 
             MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
@@ -329,7 +330,7 @@ namespace gin
         }
 
         m_allocatedSize = newAllocatedSize;
-        m_lastAllocationOffset = static_cast<SizeType>(allocStart - bufferHead);
+        m_lastAllocationOffset = static_cast<SizeType>(allocStart - bufferStart);
 
         return reinterpret_cast<void*>(allocStart);
     }

@@ -228,7 +228,8 @@ namespace gin
         }
 
         SizeType allocatedSize = m_allocatedSize;
-        uintptr_t bufferHead = m_buffer + allocatedSize;
+        uintptr_t bufferStart = m_buffer;
+        uintptr_t bufferHead = bufferStart + allocatedSize;
         uintptr_t allocStart = AlignTo(bufferHead, alignment);
 
         //assert(allocStart >= bufferHead);
@@ -258,7 +259,7 @@ namespace gin
         }
 
         m_allocatedSize = newAllocatedSize;
-        m_lastAllocationOffset = static_cast<SizeType>(allocStart - bufferHead);
+        m_lastAllocationOffset = static_cast<SizeType>(allocStart - bufferStart);
 
         return reinterpret_cast<void*>(allocStart);
     }
