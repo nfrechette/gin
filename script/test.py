@@ -31,9 +31,46 @@ WARNING_LIST = ["no-trigraphs", "no-missing-field-initializers",
                 "deprecated-declarations", "invalid-offsetof"]
 FLAGS = ["no-rtti", "asm-blocks", "strict-aliasing",
          "visibility-inlines-hidden"]
-EXTRA_FLAGS = ["-std=c++11", "-c", "-g", "-DDEBUG=1", "-O0"]
+EXTRA_FLAGS = ["-std=c++11", "-c", "-g", "-DDEBUG=1", "-O0", "-MMD"]
 INCLUDE_DIRS = [CATCH_INCLUDE_DIR, GIN_INCLUDE_DIR]
 EXEC_NAME = "test"
+
+def parse_dependencies(obj):
+    dep_path = os.path.join(GIN_INTERMEDIATE_DIR, obj.replace(".o", ".d"))
+    if not os.path.exists(dep_path):
+        print "No dependency file found at: {}".format(dep_path)
+        return []
+
+    lines = [line.strip() for line in open(dep_path)]
+
+    # Remove the first line which references the object file itself
+    del lines[0]
+
+    # Strip tailing ' \' stuff
+    lines = [line.rstrip(" \\") for line in lines]
+
+    return lines
+
+def should_compile(obj):
+    obj_path = os.path.join(GIN_INTERMEDIATE_DIR, obj)
+    if not os.path.exists(obj_path):
+        # Object file doesn't exist, build it
+        return True
+
+    obj_mtime = os.path.getmtime(obj_path)
+
+    deps = parse_dependencies(obj)
+    for dep_path in deps:
+        if not os.path.exists(dep_path):
+            # Dependency file doesn't exist, assume we are dirty
+            return True
+
+        dep_mtime = os.path.getmtime(dep_path)
+        if dep_mtime > obj_mtime:
+            # Dependency modify time is newer than object modify time, we are dirty
+            return True
+
+    return False
 
 def main():
     #print "gin root: %s" % GIN_ROOT_DIR
@@ -71,11 +108,9 @@ def main():
 
         obj_list.append(obj_path)
 
-        if os.path.exists(obj_path) and False:
-            src_mtime = os.path.getmtime(src_path)
-            obj_mtime = os.path.getmtime(obj_path)
-            if src_mtime < obj_mtime:
-                continue
+        if not should_compile(obj):
+            print "Skipping '%s'..." % src_path
+            continue
 
         compile_list = [COMPILER, warnings, flags, extra_flags,
                         include_dirs, src_path, obj_cmd]
