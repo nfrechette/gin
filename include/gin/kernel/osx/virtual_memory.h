@@ -59,9 +59,9 @@ namespace gin
 
     enum class MemoryRegionFlags
     {
-        ePrivate        = MAP_PRIVATE,
-        eShared         = MAP_SHARED,
-        eAnonymous      = MAP_ANON,
+        ePrivate        = MAP_PRIVATE,      // Changes not visible to other processes
+        eShared         = MAP_SHARED,       // Changes visible to other processes
+        eAnonymous      = MAP_ANON,         // Not backed by a file descriptor
     };
 
     IMPL_ENUM_FLAGS_OPERATORS(MemoryRegionFlags);
@@ -86,6 +86,13 @@ namespace gin
 
         void* ptr = mmap(nullptr, size, prot, flags, -1, 0);
         return ptr;
+    }
+
+    inline void* VirtualReserve(size_t size,
+                                MemoryAccessFlags accessFlags,
+                                MemoryRegionFlags regionFlags)
+    {
+        return VirtualReserve(size, 1, accessFlags, regionFlags);
     }
 
     inline bool VirtualRelease(void* ptr, size_t size)
@@ -143,6 +150,13 @@ namespace gin
 
         void* result = mmap(nullptr, size, prot, flags, -1, 0);
         return result;
+    }
+
+    inline void* VirtualAlloc(size_t size,
+                              MemoryAccessFlags accessFlags,
+                              MemoryRegionFlags regionFlags)
+    {
+        return VirtualAlloc(size, 1, accessFlags, regionFlags);
     }
 
     inline bool VirtualFree(void* ptr, size_t size)
