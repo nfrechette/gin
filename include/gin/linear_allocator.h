@@ -227,41 +227,12 @@ namespace gin
             return nullptr;
         }
 
-        SizeType allocatedSize = m_allocatedSize;
-        uintptr_t bufferStart = m_buffer;
-        uintptr_t bufferHead = bufferStart + allocatedSize;
-        uintptr_t allocStart = AlignTo(bufferHead, alignment);
-
-        //assert(allocStart >= bufferHead);
-        if (allocStart < bufferHead)
+        if (!CanSatisfyAllocation(m_buffer, m_bufferSize, m_allocatedSize, size, alignment))
         {
-            // Alignment made us overflow
             return nullptr;
         }
 
-        uintptr_t allocEnd = allocStart + size;
-        uintptr_t allocSize = allocEnd - bufferHead;
-
-        //assert(allocEnd > allocStart);
-        if (allocEnd <= allocStart)
-        {
-            // Requested size made us overflow
-            return nullptr;
-        }
-
-        SizeType bufferSize = m_bufferSize;
-        SizeType newAllocatedSize = allocatedSize + allocSize;
-        //assert(newAllocatedSize <= bufferSize);
-        if (newAllocatedSize > bufferSize)
-        {
-            // Out of memory
-            return nullptr;
-        }
-
-        m_allocatedSize = newAllocatedSize;
-        m_lastAllocationOffset = static_cast<SizeType>(allocStart - bufferStart);
-
-        return reinterpret_cast<void*>(allocStart);
+        return AllocateFromBuffer(m_buffer, m_bufferSize, m_allocatedSize, size, alignment, m_lastAllocationOffset);
     }
 
     template<typename SizeType>
