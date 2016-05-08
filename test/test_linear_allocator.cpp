@@ -103,6 +103,18 @@ TEST_CASE("allocate and free from given buffer", "[LinearAllocator]")
         REQUIRE(ptr0 != ptr3);
         REQUIRE(ptr2 != ptr3);
         REQUIRE(alloc.GetAllocatedSize() == 24);
+
+        void* ptr4 = alloc.Reallocate(ptr3, 12, 4, 1);
+        if (ptr4) memset(ptr4, 0xcd, 4);
+
+        REQUIRE(ptr3 == ptr4);
+        REQUIRE(alloc.GetAllocatedSize() == 16);
+
+        void* ptr5 = alloc.Reallocate(ptr4, 4, 128 * 1024, 1);
+        if (ptr5) memset(ptr5, 0xcd, 128 * 1024);
+
+        REQUIRE(ptr5 == nullptr);
+        REQUIRE(alloc.GetAllocatedSize() == 16);
     }
 
     SECTION("test nop free")
