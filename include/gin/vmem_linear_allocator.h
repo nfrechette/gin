@@ -140,7 +140,7 @@ namespace gin
         MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
 
         void* ptr = VirtualReserve(bufferSize, accessFlags, regionFlags);
-        assert(ptr);
+        //assert(ptr);
         if (!ptr)
         {
             // Failed to reserve virtual memory
@@ -171,7 +171,7 @@ namespace gin
         {
             void* ptr = reinterpret_cast<void*>(m_buffer);
             bool success = VirtualDecommit(ptr, m_committedSize);
-            assert(success);
+            //assert(success);
             if (!success)
             {
                 // Failed to decommit virtual memory
@@ -199,7 +199,7 @@ namespace gin
 
         void* ptr = reinterpret_cast<void*>(m_buffer);
         bool success = VirtualRelease(ptr, m_bufferSize);
-        assert(success);
+        //assert(success);
         if (!success)
         {
             // Failed to release the virtual memory
@@ -317,9 +317,8 @@ namespace gin
             MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
             MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
 
-            bool success = VirtualCommit(commitPtr, commitSize,
-                                         accessFlags, regionFlags);
-            assert(success);
+            bool success = VirtualCommit(commitPtr, commitSize, accessFlags, regionFlags);
+            //assert(success);
             if (!success)
             {
                 // Out of memory
@@ -393,9 +392,8 @@ namespace gin
                 MemoryAccessFlags accessFlags = MemoryAccessFlags::eCPU_ReadWrite;
                 MemoryRegionFlags regionFlags = MemoryRegionFlags::ePrivate | MemoryRegionFlags::eAnonymous;
 
-                bool success = VirtualCommit(commitPtr, commitSize,
-                                             accessFlags, regionFlags);
-                assert(success);
+                bool success = VirtualCommit(commitPtr, commitSize, accessFlags, regionFlags);
+                //assert(success);
                 if (!success)
                 {
                     // Out of memory
