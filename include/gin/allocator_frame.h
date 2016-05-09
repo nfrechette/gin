@@ -68,7 +68,7 @@ namespace gin
     // data should be stored in the allocator itself referenced by m_allocatorData.
     //
     // See here for more details:
-    // http://nfrechette.github.io/2015/??/??/stack_frame_allocator/
+    // http://nfrechette.github.io/2016/05/09/greedy_stack_frame_allocator/
     //////////////////////////////////////// 
 
     class AllocatorFrame

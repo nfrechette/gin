@@ -42,7 +42,7 @@ namespace gin
     // The allocator is not thread-safe.
     //
     // See here for more details:
-    // http://nfrechette.github.io/2015/??/??/stack_frame_allocator/
+    // http://nfrechette.github.io/2016/05/09/greedy_stack_frame_allocator/
     ////////////////////////////////////////
 
     template<typename SizeType>
